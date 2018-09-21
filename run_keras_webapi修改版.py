@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from keras.applications import ResNet50
 from keras.preprocessing.image import img_to_array
 from keras.applications import imagenet_utils
@@ -6,6 +7,7 @@ import numpy as np
 import flask
 import io
 import tensorflow as tf
+
 
 #初始化 Flask application 和the Keras model
 app = flask.Flask(__name__)
@@ -61,11 +63,17 @@ def predict():
 			# 如果运行到这里，显然是成功了
 			data["success"] = True
 	# 将返回结果jsonify
-	return flask.jsonify(data)
+	#return res.jsonify(data)
+	# 解决Apache跨域访问
+	res=flask.make_response(flask.jsonify(data))
+	res.headers['Access-Control-Allow-Origin'] = '*'
+	res.headers['Access-Control-Allow-Methods'] = 'POST,GET,OPTIONS'
+	res.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
+	return res
 
 # 主函数
 if __name__ == "__main__":
 	print(("* 导入keras模型中..."
 		"请等待模型导入完毕……"))
 	load_model()
-	app.run()
+	app.run(host='114.64.249.179',port=5000)
