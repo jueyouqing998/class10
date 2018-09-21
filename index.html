@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="html/text; charset=utf-8" />
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<title>图片ResNet50分类</title>
+<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+<br />
+<br />
+<table width="600" border="1" align="center">
+  <tr>
+    <td>&nbsp;</td>
+    <td><form  action="http://114.64.249.179:5000/predict"  id="tf" name="tf">
+	<table width="100%" border="0">
+  <tr>
+    <td width="27%"><div align="right">上传图片：</div></td>
+    <td width="73%"><input type="file" name="image" id="image" accept=".jpg" /></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><input type="button" id="submitAdd" name="submitAdd" value="提交"  />
+      &nbsp;
+      <input type="reset" name="clear" value="清空" /></td>
+  </tr>
+</table>
+   </form></td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<table id="table_1" width="600" border="0" align="center"></table>
+</body>
+</html>
+<script type="text/javascript">
+        $(function(){		
+            $("#submitAdd").click(function(){
+                var formdata = new FormData(document.getElementById("tf"));
+                //formdata.append("name", $("#con").val());
+                formdata.append("image", $("#image")[0].files[0]);
+                $.ajax({
+                    url:"http://114.64.249.179:5000/predict",
+                    type:"POST",
+                    data:formdata,
+					async: false,
+					dataType:"json",
+					crossDomain: true,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success:function(data){
+                    	 var item;
+						 var num=1;
+						 item=eval(data);
+						 item=item['predictions'];
+						 var  aaa;
+						 //console.log("log"+55);
+						 //console.log(item['predictions']);
+						 for ( var i = 0; i < item.length; i++) {						 	 
+						     aaa=aaa+"<tr><td width='100'><font color=‘blue’>识别"+ num +"：</font></td><td>"+item[i]['label']+"</td><td width='80'><font color=‘green’> 可能性：</font></td><td>"+item[i]['probability']+"</td></tr>";
+							 console.log(aaa);
+							 num=num+1;
+						 }
+					     $('#table_1').html(aaa); 
+                    },
+         			error: function (returndata) {
+              			 alert(returndata);
+          			}
+                });
+            });
+        });
+		
+		
+</script>
+ 
