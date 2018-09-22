@@ -9,40 +9,68 @@
 <body>
 <br />
 <br />
-<table width="600" border="1" align="center">
+<table width="600" border="1" align="center" cellspacing="0"  bordercolor="#ccc">
   <tr>
     <td>&nbsp;</td>
     <td><form  action="http://114.64.249.179:5000/predict"  id="tf" name="tf">
 	<table width="100%" border="0">
-  <tr>
-    <td width="27%"><div align="right">上传图片：</div></td>
-    <td width="73%"><input type="file" name="image" id="image" accept=".jpg" /></td>
+  <tr >
+    <td height="42" width="27%"><div align="right">上传图片： </div></td>
+    <td height="42" width="73%"><input type="file" name="image" id="image" accept=".jpg,.jpeg,.png,.gif" /></td>
   </tr>
   <tr>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
+    <td height="42" colspan="2"><div align="center"><font size="4pt" color="#FF66FF">*只能上传 png, jpg, jpeg, gif格式的文件才能返回有效结果</font></div></td>
   </tr>
   <tr>
-    <td>&nbsp;</td>
-    <td><input type="button" id="submitAdd" name="submitAdd" value="提交"  />
+    <td colspan="2">
+	<!-- 保存用户自定义的背景图片 -->
+    <img id="cropedBigImg" value='custom' alt="此处将显示图片..." data-address='' title="自定义背景"/></td>
+  </tr>
+  <tr>
+    <td height="42" >&nbsp;</td>
+    <td><div align="right">
+      <input type="button" id="submitAdd" name="submitAdd" value="提交至分类服务器"  />
       &nbsp;
-      <input type="reset" name="clear" value="清空" /></td>
+      <input type="reset" name="clear" id="clear" value="清除图片" />
+    </div></td>
   </tr>
 </table>
    </form></td>
     <td>&nbsp;</td>
   </tr>
 </table>
-<p>&nbsp;</p>
 <table id="table_1" width="600" border="0" align="center"></table>
 </body>
 </html>
 <script type="text/javascript">
+		$('#clear').on('click',function(){
+			$('#cropedBigImg').attr('src','');
+			$('#cropedBigImg').attr('alt','此处将显示图片...');
+		});
+        $('#image').on('change',function(){
+    		var filePath = $(this).val();   	
+			//获取到input的value，里面是文件的路径
+    	    fileFormat = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+			//alert(fileFormat);  
+    		src = window.URL.createObjectURL(this.files[0]); //转成可以在本地预览的格式
+			// 检查是否是图片
+    		if( !fileFormat.match(/.png|.jpg|.jpeg|.gif/) ) {
+    			error_prompt_alert('上传错误,文件格式必须为：png/jpg/jpeg/gif');
+        		return;  
+        	}
+  
+        	$('#cropedBigImg').attr('src',src);
+		});
+		
         $(function(){		
             $("#submitAdd").click(function(){
+				$('#table_1').html(''); 
                 var formdata = new FormData(document.getElementById("tf"));
                 //formdata.append("name", $("#con").val());
-                formdata.append("image", $("#image")[0].files[0]);
+				if($("#image")[0].files[0]!==undefined )
+                	formdata.append("image", $("#image")[0].files[0]);
+				else
+				    alert("必须上传图片！");
                 $.ajax({
                     url:"http://114.64.249.179:5000/predict",
                     type:"POST",
@@ -59,9 +87,10 @@
 						 item=eval(data);
 						 item=item['predictions'];
 						 var  aaa;
+						 aaa="<tr><td height='42' colspan='4'><div align='center'>以下为识别的结果，以准确度排序&nbsp;</div></td><tr>"		
 						 //console.log("log"+55);
 						 //console.log(item['predictions']);
-						 for ( var i = 0; i < item.length; i++) {						 	 
+						 for ( var i = 0; i < item.length; i++) {						     				 	 
 						     aaa=aaa+"<tr><td width='100'><font color=‘blue’>识别"+ num +"：</font></td><td>"+item[i]['label']+"</td><td width='80'><font color=‘green’> 可能性：</font></td><td>"+item[i]['probability']+"</td></tr>";
 							 console.log(aaa);
 							 num=num+1;

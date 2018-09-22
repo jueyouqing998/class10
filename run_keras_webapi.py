@@ -7,7 +7,15 @@ import numpy as np
 import flask
 import io
 import tensorflow as tf
+import os
 
+#允许上传的图片类型
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])  
+
+#验证上传文件
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 #初始化 Flask application 和the Keras model
 app = flask.Flask(__name__)
@@ -44,9 +52,10 @@ def predict():
 	data = {"success": False}
 	#确保输入数据为图片，调用方式为POST
 	if flask.request.method == "POST":
-		if flask.request.files.get("image"):
+		if flask.request.files.get("image") and allowed_file(flask.request.files.get("image").filename):
 			# 读入图片数据
 			image = flask.request.files["image"].read()
+			print(os.path.abspath(flask.request.files.get("image").filename))
 			image = Image.open(io.BytesIO(image))
 			# 调用预处理程序
 			image = prepare_image(image, target=(224, 224))
